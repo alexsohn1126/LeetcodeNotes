@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Add and save notes for later in Leetcode",
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "action": {
     "default_title": "Leetcode Notes",
