@@ -1,15 +1,29 @@
-// Get the textarea element and save button
+// Get the pproblemNum element, textarea element and save button
 const problemNum = document.getElementById('problemNum');
 const input = document.getElementById('input');
 const saveBtn = document.getElementById('save');
 
-function onGotTab(tab){
-  console.log(tab);
-  if (tab.url.match(/https:\/\/leetcode\.com\/problems\/.*/)){
-    problemNum.innerHTML = tab.url;
-  } else {
-    problemNum.innerHTML = "Not in a leetcode site";
+function getQuestionNum(){
+  let spans = document.getElementsByTagName("span");
+  let spanMatch = /\d+\. .+/;
+
+  for (const s in spans) {
+    if (spans[s].textContent && spans[s].textContent.match(spanMatch)) {
+      return spans[s].textContent.split(".")[0];
+    }
   }
+}
+
+function onGotTab(tab){
+  if (!tab.url.match(/https:\/\/leetcode\.com\/problems\/.*/)){
+    return;
+  }
+  browser.scripting.executeScript(
+    {
+      target: { tabId: tab.id },
+      func: getQuestionNum,
+    }
+  ).then(result => problemNum.innerHTML = result[0].result);
 }
 
 function onError(error){
