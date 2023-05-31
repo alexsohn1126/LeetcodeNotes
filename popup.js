@@ -1,11 +1,16 @@
 // Get the pproblemNum element, textarea element and save button
 const problemNum = document.getElementById('problemNum');
+const noteNumSelect = document.getElementById('noteNumSelect');
 const input = document.getElementById('input');
 const saveBtn = document.getElementById('save');
 
+var notes;
+
+// Get question number
 function getQuestionNum(){
   let spans = document.getElementsByTagName("span");
-  let spanMatch = /\d+\. .+/;
+  // match anything that has more than 1 number, then a dot + space, then more than 1 letter of anything
+  let spanMatch = /\d+\. .+/;   
 
   for (const s in spans) {
     if (spans[s].textContent && spans[s].textContent.match(spanMatch)) {
@@ -16,14 +21,44 @@ function getQuestionNum(){
 
 function onGotTab(tab){
   if (!tab.url.match(/https:\/\/leetcode\.com\/problems\/.*/)){
-    return;
+    throw new Error("Not in a leetcode page!");
   }
-  browser.scripting.executeScript(
+
+  // Get question number from the page
+  return browser.scripting.executeScript(
     {
       target: { tabId: tab.id },
       func: getQuestionNum,
     }
-  ).then(result => problemNum.innerHTML = result[0].result);
+  );
+}
+
+// Set title to current page number and select/add it to the dropdown menu
+function onGotProblemNum(foundProbNum){
+  problemNum.innerText = foundProbNum;
+  if (foundProbNum in notes){
+    input.value = notes[foundProbNum];
+  } else {
+    addToProblemNoteDropdown(foundProbNum);
+  }
+  noteNumSelect.value = foundProbNum;
+}
+
+// Initialize notes var, populate dropdown menu with saved notes
+function onGotStoredNotes(notesData){
+  notes = notesData.notes || {};
+  for (const probNum of Object.keys(notes)){
+    addToProblemNoteDropdown(probNum);
+  }
+  return browser.tabs.query({ active: true, currentWindow: true });
+}
+
+// Add probNum to the dropdown select menu
+function addToProblemNoteDropdown(probNum){
+  let problemNote = document.createElement('option');
+  problemNote.value = probNum;
+  problemNote.innerHTML = probNum;
+  noteNumSelect.appendChild(problemNote);
 }
 
 function onError(error){
@@ -32,17 +67,14 @@ function onError(error){
 
 // Load saved text on page load
 window.onload = () => {
-  browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => onGotTab(tabs[0]), onError);
-
-  browser.storage.sync.get('savedText').then((data) => {
-    if (data.savedText) {
-      input.value = data.savedText;
-    }
-  });
+  browser.storage.local.get("notes")
+    .then(data => onGotStoredNotes(data), onError)
+    .then(tabs => onGotTab(tabs[0]), onError)
+    .then(foundProbNum => onGotProblemNum(foundProbNum[0].result), onError);
 };
 
 // Save text when button is clicked
 saveBtn.onclick = () => {
-  const text = input.value;
-  browser.storage.sync.set({ savedText: text });
+  notes[noteNumSelect.value] = input.value;
+  browser.storage.local.set({ notes: notes });
 };
