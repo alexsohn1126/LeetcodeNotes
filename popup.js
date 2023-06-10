@@ -21,6 +21,7 @@ function getQuestionNum(){
 
 function onGotTab(tab){
   if (!tab.url.match(/https:\/\/leetcode\.com\/problems\/.*/)){
+    input.value = notes[noteNumSelect.value] || '';
     throw new Error("Not in a leetcode page!");
   }
 
@@ -72,6 +73,10 @@ window.onload = () => {
     .then(tabs => onGotTab(tabs[0]), onError)
     .then(foundProbNum => onGotProblemNum(foundProbNum[0].result), onError);
 };
+
+noteNumSelect.onchange = () => {
+  input.value = notes[noteNumSelect.value];
+}
 
 // Save text when button is clicked
 saveBtn.onclick = () => {
