@@ -21,7 +21,8 @@ function getQuestionNum(){
 
 function onGotTab(tab){
   if (!tab.url.match(/https:\/\/leetcode\.com\/problems\/.*/)){
-    input.value = notes[noteNumSelect.value] || '';
+    input.value = notes[noteNumSelect.value] || "";
+    problemNum.innerText = "Please go to a leetcode question to start"
     throw new Error("Not in a leetcode page!");
   }
 
@@ -36,7 +37,7 @@ function onGotTab(tab){
 
 // Set title to current page number and select/add it to the dropdown menu
 function onGotProblemNum(foundProbNum){
-  problemNum.innerText = foundProbNum;
+  problemNum.innerText = "Question " + foundProbNum;
   if (foundProbNum in notes){
     input.value = notes[foundProbNum];
   } else {
@@ -75,7 +76,7 @@ window.onload = () => {
 };
 
 noteNumSelect.onchange = () => {
-  input.value = notes[noteNumSelect.value];
+  input.value = notes[noteNumSelect.value] || "";
 }
 
 // Save text when button is clicked
