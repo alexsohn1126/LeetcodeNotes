@@ -30,7 +30,8 @@ h1 {
   border: 1px solid #999999;
   resize: vertical;
   background-color: #333333;
-  color: #FFFFFF; /* Updated to white color */
+  color: #FFFFFF;
+  resize: none;
 }
 
 #save {
